@@ -77,12 +77,12 @@
 #'
 #' \dontrun{
 #' # Cluster Countries using GDP from year 2000 to year 2014
-#' clubs <- findClubs(countryGDP, dataCols=2:35, regions = 1, refCol=35, time_trim = 1/3,
-#'                    cstar = 0, HACmethod = "FQSB")
+#' clubs <- findClubs(countryGDP,  dataCols=2:35, regions = 1, refCol=35,
+#'                    time_trim = 1/3, cstar = 0, HACmethod = "AQSB")
 #' }
 #'
-#' clubs <- findClubs(countryGDP, dataCols=2:35, regions = 1, refCol=35, time_trim = 1/3,
-#'                    cstar = 0, HACmethod = "AQSB")
+#' clubs <- findClubs(countryGDP, dataCols=2:35, regions = 1, refCol=35,
+#'                    time_trim = 1/3, cstar = 0, HACmethod = "FQSB")
 #' summary(clubs)
 #'
 #'
@@ -118,6 +118,7 @@ findClubs<- function(X, #data matrix or data.frame
                        class = c("convergence.clubs", "list"),
                        data = X,
                        dataCols = dataCols,
+                       regions = regions,
                        refCol = refCol,
                        time_trim = time_trim,
                        cstar = cstar,
@@ -203,7 +204,7 @@ findClubs<- function(X, #data matrix or data.frame
         }
 
         #find core group (returns the row indices of regions in core Group)
-        coreGroup <- coreG(X=dati, refCol, dataCols, time_trim, threshold,
+        coreGroup <- coreG(X=dati, dataCols, time_trim, threshold,
                            HACmethod = HACmethod, type="max")
         #if no more core groups are found, add divergent to output and return
         if (identical(coreGroup, FALSE) ){

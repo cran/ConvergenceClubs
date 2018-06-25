@@ -15,12 +15,13 @@
 #' should be tried.
 #' @param threshold a numeric value indicating the threshold to be used with the t-test.
 #'
-#' @return A list of Convergence Clubs, for each club a list is return with the
+#' @return Ad object of class \code{convergence.clubs}, containing a list of
+#' Convergence Clubs, for each club a list is return with the
 #' following objects: \code{id}, a vector containing the row indices
 #' of the regions in the club; \code{model}, a list containing information
 #' about the model used to run the t-test on the regions in the club;
 #' \code{regions}, a vector containing the names of the regions of the club (optional,
-#' only included if it is present in the \code{clubs} object given in input.
+#' only included if parameter \code{regions} is given)
 #'
 #'
 #' @details Phillips and Sul (2009) suggest a "club merging algorithm" to avoid
@@ -72,9 +73,9 @@
 #' @examples
 #' data("countryGDP")
 #'
-#' # Cluster Countries using GDP from year 2000 to year 2014
-#' clubs <- findClubs(countryGDP, dataCols=2:35, regions = 1, refCol=35, time_trim = 1/3,
-#'                    cstar = 0, HACmethod = "AQSB")
+#' # Cluster Countries using GDP from year 1970 to year 2003
+#' clubs <- findClubs(countryGDP, dataCols=2:35, regions = 1, refCol=35,
+#'                    time_trim = 1/3, cstar = 0, HACmethod = "FQSB")
 #' summary(clubs)
 #'
 #' # Merge clusters
@@ -119,29 +120,20 @@ mergeClubs <- function(clubs,
 
 
     ### Initialise variables ---------------------------------------------------
-    ll <- length(clubs) - 1 #the last element is 'divergent'
-    if(ll<2) stop('There is only one club')
-
+    ll <- dim(clubs)[1] #number of clubs
+    if(ll<2){
+        message('The number of clubs is <2, there is nothing to merge.')
+        return(clubs)
+    }
     #output
-    pclub <- structure(list(),
-                       class = c("convergence.clubs", "list"),
-                       data = X,
-                       dataCols = dataCols,
-                       refCol = refCol,
-                       time_trim = time_trim,
-                       cstar = attr(clubs, 'cstar'),
-                       HACmethod = HACmethod
-    )
+    attrib <- attributes(clubs)
+    attrib$names <- NULL
+    pclub <- list()
+    attributes(pclub) <- attrib
+
     n <- 0
     appendLast <- FALSE
     club_names <- names(clubs)
-
-
-    # ### Set methods  -----------------------------------------------------------
-    # #select functions to compute t-values
-    # estimateMod <<- if(HACmethod=='FQSB'){
-    #     estimateMod_fqsb
-    # }else estimateMod_aqsb
 
     ### Merging procedure ------------------------------------------------------
     i <- 1
@@ -197,11 +189,11 @@ mergeClubs <- function(clubs,
         )
         if(returnRegions) pclub[[paste('club',n,sep='')]]$regions <- regions
         if(appendLast){
-            pclub[[paste('club',n+2,sep='')]] <- list(clubs = club_names[ll],
+            pclub[[paste('club',n+1,sep='')]] <- list(clubs = club_names[ll],
                                                       id = clubs[[ll]]$id,
                                                       model = clubs[[ll]]$model
             )
-            if(returnRegions) pclub[[paste('club',n+2,sep='')]]$regions <- clubs[[ll]]$regions
+            if(returnRegions) pclub[[paste('club',n+1,sep='')]]$regions <- clubs[[ll]]$regions
         }
     }
     pclub$divergent <- clubs$divergent

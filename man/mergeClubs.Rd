@@ -24,12 +24,13 @@ should be tried.}
 \item{threshold}{a numeric value indicating the threshold to be used with the t-test.}
 }
 \value{
-A list of Convergence Clubs, for each club a list is return with the
+Ad object of class \code{convergence.clubs}, containing a list of
+Convergence Clubs, for each club a list is return with the
 following objects: \code{id}, a vector containing the row indices
 of the regions in the club; \code{model}, a list containing information
 about the model used to run the t-test on the regions in the club;
 \code{regions}, a vector containing the names of the regions of the club (optional,
-only included if it is present in the \code{clubs} object given in input.
+only included if parameter \code{regions} is given)
 }
 \description{
 Merges a list of clubs created with the function findClubs
@@ -69,9 +70,9 @@ This algorithm suggests to merge for adjacent groups. In particular, it works as
 \examples{
 data("countryGDP")
 
-# Cluster Countries using GDP from year 2000 to year 2014
-clubs <- findClubs(countryGDP, dataCols=2:35, regions = 1, refCol=35, time_trim = 1/3,
-                   cstar = 0, HACmethod = "AQSB")
+# Cluster Countries using GDP from year 1970 to year 2003
+clubs <- findClubs(countryGDP, dataCols=2:35, regions = 1, refCol=35,
+                   time_trim = 1/3, cstar = 0, HACmethod = "FQSB")
 summary(clubs)
 
 # Merge clusters
