@@ -10,18 +10,23 @@
 #' value used for \code{clubs} is used.
 #' @param mergeMethod character string indicating the merging method to use. Methods
 #' available are \code{"PS"} for Phillips and Sul (2009) and \code{"vLT"} for
-#' von Lyncker and Thoennessen (2016).
-#' @param mergeDivergent logical, if TRUE, indicates that merging of divergent regions
+#' von Lyncker and Thoennessen (2017).
+#' @param mergeDivergent logical, if TRUE, indicates that merging of divergent units
 #' should be tried.
 #' @param threshold a numeric value indicating the threshold to be used with the t-test.
+#' @param estar a numeric value indicating the threshold \eqn{e^*}{e*} to test
+#' if divergent units may be included in one of the new convergence clubs.
+#' To be used only if \code{mergeDivergent=TRUE}
+#'
+#'
 #'
 #' @return Ad object of class \code{convergence.clubs}, containing a list of
 #' Convergence Clubs, for each club a list is return with the
 #' following objects: \code{id}, a vector containing the row indices
-#' of the regions in the club; \code{model}, a list containing information
-#' about the model used to run the t-test on the regions in the club;
-#' \code{regions}, a vector containing the names of the regions of the club (optional,
-#' only included if parameter \code{regions} is given)
+#' of the units in the club; \code{model}, a list containing information
+#' about the model used to run the t-test on the units in the club;
+#' \code{unit_names}, a vector containing the names of the units of the club (optional,
+#' only included if parameter \code{unit_names} is given)
 #'
 #'
 #' @details Phillips and Sul (2009) suggest a "club merging algorithm" to avoid
@@ -36,8 +41,9 @@
 #'     \item If convergence hypothesis is rejected, conclude that all previous groups
 #'     converge, except the last one. Hence, start again the test merging algorithm
 #'     beginning from the group for which the hypothesis of convergence did not hold.
-#'     On the other hand, von Lyncker and Thoennessen (2016), propose a modified version
-#'      of the club merging algorithm that works as follows:
+#' }
+#' On the other hand, von Lyncker and Thoennessen (2017), propose a modified version
+#' of the club merging algorithm that works as follows:
 #'         \enumerate{
 #'             \item Take all the groups detected in the basic clustering mechanism (P)
 #'             and run the t-test for adjacent groups, obtaining a (M × 1) vector
@@ -52,7 +58,7 @@
 #'             the only condition required for merging is \eqn{t(m=M) > -1.65}.
 #'         }
 #'
-#' }
+#'
 #'
 #'
 #' @references
@@ -60,21 +66,22 @@
 #'
 #' Phillips, P. C.; Sul, D., 2009. Economic transition and growth. Journal of Applied Econometrics 24 (7), 1153-1185.
 #'
-#' von Lyncker, K.; Thoennessen, R., 2016. Regional club convergence in the EU: evidence from a panel data analysis. Empirical Economics.
+#' von Lyncker, K.; Thoennessen, R., 2017. Regional club convergence in the EU: evidence from a panel data analysis.
+#' Empirical Economics 52 (2),  525-553
 #'
 #'
 #' @seealso
 #' \code{\link{findClubs}}, finds convergence clubs by means of Phillips and Sul clustering procedure.
 #'
-#' \code{\link{mergeDivergent}}, merges divergent units according to the algorithm proposed by von Lyncker and Thoennessen (2016).
+#' \code{\link{mergeDivergent}}, merges divergent units according to the algorithm proposed by von Lyncker and Thoennessen (2017).
 #'
 #'
 #'
 #' @examples
-#' data("countryGDP")
+#' data("filteredGDP")
 #'
 #' # Cluster Countries using GDP from year 1970 to year 2003
-#' clubs <- findClubs(countryGDP, dataCols=2:35, regions = 1, refCol=35,
+#' clubs <- findClubs(filteredGDP, dataCols=2:35, unit_names = 1, refCol=35,
 #'                    time_trim = 1/3, cstar = 0, HACmethod = "FQSB")
 #' summary(clubs)
 #'
@@ -91,8 +98,9 @@
 mergeClubs <- function(clubs,
                        time_trim,
                        mergeMethod=c('PS','vLT'),
+                       threshold = -1.65,
                        mergeDivergent=FALSE,
-                       threshold = -1.65){
+                       estar = -1.65){
 
     ### Check inputs -----------------------------------------------------------
     # HACmethod <- match.arg(HACmethod)
@@ -141,24 +149,24 @@ mergeClubs <- function(clubs,
         units <- clubs[[i]]$id
         cnm <- club_names[i]  #club name
         mod <- list()
-        returnRegions <- !is.null(clubs[[i]]$regions)
-        if(returnRegions) regions <- clubs[[i]]$regions
+        returnNames <- !is.null(attr(clubs, 'unit_names'))
+        if(returnNames) unit_names <- clubs[[i]]$unit_names
         for(k in (i+1):ll){
             addunits <- clubs[[k]]$id
-            if(returnRegions) addregions <- clubs[[k]]$regions
+            if(returnNames) addnames <- clubs[[k]]$unit_names
             H <- computeH(X[c(units,addunits), dataCols])
             mod <- estimateMod(H, time_trim, HACmethod = HACmethod)
-            tvalue <- mod$tvalue
+            tvalue <- mod['tvalue']
             #check if a couple of clubs can be merged
             if(tvalue > threshold){
                 if(mergeMethod=='vLT' & k <= ll-1){#method by von Lyncker and Rasmus Thoennessen (2016)
                     nextcouple <- c(clubs[[k]]$id,clubs[[k+1]]$id)
                     H <- computeH(X[nextcouple, dataCols])
                     mod2 <- estimateMod(H,time_trim)
-                    tvalue2 <- mod2$tvalue
+                    tvalue2 <- mod2['tvalue']
                     if(tvalue > tvalue2){#if true, merge
                         units <- c(units,addunits)
-                        if(returnRegions) regions <- c(regions,addregions)
+                        if(returnNames) unit_names <- c(unit_names,addnames)
                         cnm <- c(cnm, club_names[k])
                     }else break
                 }else{#method by Phillips and Sul (2009)
@@ -166,7 +174,7 @@ mergeClubs <- function(clubs,
                     #until now, then keep scanning the club list
                     # and repeat thetest adding another club
                     units <- c(units,addunits)
-                    if(returnRegions) regions <- c(regions,addregions)
+                    if(returnNames) unit_names <- c(unit_names,addnames)
                     cnm <- c(cnm, club_names[k])
                 }
             }else{
@@ -187,17 +195,17 @@ mergeClubs <- function(clubs,
                                                 id = units,
                                                 model = estimateMod(H, time_trim, HACmethod = HACmethod)
         )
-        if(returnRegions) pclub[[paste('club',n,sep='')]]$regions <- regions
+        if(returnNames) pclub[[paste('club',n,sep='')]]$unit_names <- unit_names
         if(appendLast){
             pclub[[paste('club',n+1,sep='')]] <- list(clubs = club_names[ll],
-                                                      id = clubs[[ll]]$id,
+                                                      id    = clubs[[ll]]$id,
                                                       model = clubs[[ll]]$model
             )
-            if(returnRegions) pclub[[paste('club',n+1,sep='')]]$regions <- clubs[[ll]]$regions
+            if(returnNames) pclub[[paste('club',n+1,sep='')]]$unit_names <- clubs[[ll]]$unit_names
         }
     }
     pclub$divergent <- clubs$divergent
     if(mergeDivergent){
-        return(mergeDivergent(pclub, time_trim, threshold))
+        return(mergeDivergent(pclub, time_trim, estar))
     }else return(pclub)
 }

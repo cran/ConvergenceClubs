@@ -7,7 +7,7 @@
 #' @param quantity string indicating the quantity that should be returned. The options are
 #' \code{"H"}, the default, only the vector of cross-sectional variance is returned; \code{"h"},
 #' only the matrix of transition path h is return; \code{"both"}, a list containing
-#' both h and H is returned.s
+#' both h and H is returned.
 #' @param id optional; row index of regions for which H values are to be computed;
 #' if missing, all regions are used
 #'
@@ -32,11 +32,11 @@
 #'
 #'
 #' @examples
-#' data("countryGDP")
+#' data("filteredGDP")
 #'
-#' h <- computeH(countryGDP[,-1], quantity="h")
-#' H <- computeH(countryGDP[,-1], quantity="H")
-#' b <- computeH(countryGDP[,-1], quantity="both")
+#' h <- computeH(filteredGDP[,-1], quantity="h")
+#' H <- computeH(filteredGDP[,-1], quantity="H")
+#' b <- computeH(filteredGDP[,-1], quantity="both")
 #'
 #'
 #' @export

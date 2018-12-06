@@ -19,10 +19,10 @@
 #' The default value is 0.
 #'
 #' @return A list of three objects: \code{id}, a vector containing the row indices
-#' of club regions in the original dataframe (input of function \code{findClubs});
+#' of club units in the original dataframe (input of function \code{findClubs});
 #' \code{rows}, a vector of row indices of club units in the current dataset
 #' (input of function \code{club}); \code{model}, a list containing information
-#' about the model used to run the t-test on the regions in the club.
+#' about the model used to run the t-test on the units in the club.
 #'
 #' @references
 #' Phillips, P. C.; Sul, D., 2007. Transition modeling and econometric convergence tests. Econometrica 75 (6), 1771-1855.
@@ -49,9 +49,9 @@ club <- function(X,
     for (k in seq_len(nrow(unitsNoCore)) ){
         #compute H
         H <- computeH( X[ c(core, unitsNoCore$row[k]), dataCols ])
-        tvalue <- c(tvalue, estimateMod(H, time_trim, HACmethod = HACmethod)$tvalue)
+        tvalue <- c(tvalue, estimateMod(H, time_trim, HACmethod = HACmethod)['tvalue'])
     }
-    #Find group (core + regions) such that (core + i)  gives t > cstar
+    #Find group (core + units) such that (core + i)  gives t > cstar
     clubCandidates_id <- unitsNoCore[which(tvalue > cstar), 'id']
     clubCandidates_row <- unitsNoCore[which(tvalue > cstar), 'row']
 
@@ -66,8 +66,5 @@ club <- function(X,
     #return club info
     return( list(id = clubId, #id of units in the club
                  rows = clubRows, #row indices of club units in input
-                 model = list(beta = mod$beta,
-                              st.dev = mod$st.dev,
-                              tvalue = mod$tvalue,
-                              pvalue = mod$pvalue)))
+                 model = mod) )
 }

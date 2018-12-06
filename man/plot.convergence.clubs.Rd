@@ -4,10 +4,10 @@
 \alias{plot.convergence.clubs}
 \title{Plot method for S3 class \code{convergence.clubs}}
 \usage{
-\method{plot}{convergence.clubs}(x, y = NULL, nrows = NULL, ncols = NULL,
-  clubs, avgTP = TRUE, avgTP_clubs, y_fixed = FALSE, legend = FALSE,
-  save = FALSE, filename, path, width = 7, height = 7, device = c("pdf",
-  "png", "jpeg"), res, ...)
+\method{plot}{convergence.clubs}(x, y = NULL, nrows = NULL,
+  ncols = NULL, clubs, avgTP = TRUE, avgTP_clubs, y_fixed = FALSE,
+  legend = FALSE, save = FALSE, filename, path, width = 7,
+  height = 7, device = c("pdf", "png", "jpeg"), res, ...)
 }
 \arguments{
 \item{x}{an x of class \code{convergence.clubs}.}
@@ -20,7 +20,7 @@
 
 \item{clubs}{numeric scalar or vector, indicating for which clubs the transition
 path plot should be generated. Optional, if omitted, plots for all clubs are produced.
-If \code{NULL}, transition path are not plotted for any club.}
+If \code{clubs=NULL}, transition path are not plotted for any club.}
 
 \item{avgTP}{logical, indicates if a plot of the average transition paths of
 the convergence clubs should be produced, default to \code{TRUE}}
@@ -53,7 +53,7 @@ one of "pdf", "png" or "jpeg".}
 \item{...}{other parameters to pass to function \code{plot()}.}
 }
 \description{
-Plot the transition paths of regions in the convergence clubs and the
+Plot the transition paths of units in the convergence clubs and the
 average transition paths of those clubs.
 }
 \details{
@@ -70,7 +70,7 @@ using the following regular plot parameters:
        set it to \code{"white"} to remove the horizontal line.
 }
 
-If \code{legend=TRUE} and a column with regions' names is available in the
+If \code{legend=TRUE} and a column with units' names is available in the
 \code{x} object, those names are truncated to fit the plot's legend. The graphical
 parameter \code{cex} may be used to modify the size of the legend's labels, default is 0.8
 
@@ -81,9 +81,9 @@ Enlarging the plot window usually solves the problem.
 }
 \examples{
 
-data("countryGDP")
+data("filteredGDP")
 
-clubs <- findClubs(countryGDP, dataCols=2:35, regions = 1, refCol=35, time_trim = 1/3,
+clubs <- findClubs(filteredGDP, dataCols=2:35, unit_names = 1, refCol=35, time_trim = 1/3,
                    cstar = 0, HACmethod = "FQSB")
 
 #plot transition paths for all clubs

@@ -11,7 +11,7 @@ Functions for clustering regions that form convergence clubs, according to the d
 \section{Main functions}{
 
 The package's main functions are \code{findClubs} and \code{mergeClubs}. The
-former finds clubs of convergence, given a dataset with regions in rows and
+former finds clubs of convergence, given a dataset with units in rows and
 years in columns, returning an object of class \code{convergence.clubs}. The
 latter takes as argument an object of class \code{convergence.clubs} and
 applies the clustering procedure to the convergence clubs contained in the argument,
@@ -23,12 +23,13 @@ Phillips, P. C.; Sul, D., 2007. Transition modeling and econometric convergence 
 
 Phillips, P. C.; Sul, D., 2009. Economic transition and growth. Journal of Applied Econometrics 24 (7), 1153-1185.
 
-von Lyncker, K.; Thoennessen, R., 2016. Regional club convergence in the EU: evidence from a panel data analysis. Empirical Economics.
+von Lyncker, K.; Thoennessen, R., 2017. Regional club convergence in the EU: evidence from a panel data analysis.
+Empirical Economics 52 (2),  525-553
 }
 \seealso{
 Useful links:
 \itemize{
-  \item \url{https://github.com/rhobis/ConvergenceClubs}
+  \item \url{https://CRAN.R-project.org/package=ConvergenceClubs}
   \item Report bugs at \url{https://github.com/rhobis/ConvergenceClubs/issues}
 }
 

@@ -1,6 +1,6 @@
 #'Plot method for S3 class \code{convergence.clubs}
 #'
-#'Plot the transition paths of regions in the convergence clubs and the
+#'Plot the transition paths of units in the convergence clubs and the
 #'average transition paths of those clubs.
 #'
 #'@param x an x of class \code{convergence.clubs}.
@@ -11,7 +11,7 @@
 #'@param legend logical, should a legend be displayed?
 #'@param clubs numeric scalar or vector, indicating for which clubs the transition
 #'path plot should be generated. Optional, if omitted, plots for all clubs are produced.
-#'If \code{NULL}, transition path are not plotted for any club.
+#'If \code{clubs=NULL}, transition path are not plotted for any club.
 #'@param avgTP logical, indicates if a plot of the average transition paths of
 #'the convergence clubs should be produced, default to \code{TRUE}
 #'@param avgTP_clubs numeric scalar or vector, indicating for which clubs the average transition
@@ -44,7 +44,7 @@
 #'        set it to \code{"white"} to remove the horizontal line.
 #'}
 #'
-#'If \code{legend=TRUE} and a column with regions' names is available in the
+#'If \code{legend=TRUE} and a column with units' names is available in the
 #'\code{x} object, those names are truncated to fit the plot's legend. The graphical
 #'parameter \code{cex} may be used to modify the size of the legend's labels, default is 0.8
 #'
@@ -56,9 +56,9 @@
 #'
 #'@examples
 #'
-#' data("countryGDP")
+#' data("filteredGDP")
 #'
-#' clubs <- findClubs(countryGDP, dataCols=2:35, regions = 1, refCol=35, time_trim = 1/3,
+#' clubs <- findClubs(filteredGDP, dataCols=2:35, unit_names = 1, refCol=35, time_trim = 1/3,
 #'                    cstar = 0, HACmethod = "FQSB")
 #'
 #' #plot transition paths for all clubs
@@ -137,7 +137,7 @@ plot.convergence.clubs <- function(x,
         avgTP_clubs <- seq_len(num_clubs)
     }else if( is.null(avgTP_clubs) ){
         avgTP_clubs <- seq_len(num_clubs)
-    }else if( !is.vector(avgTP_clubs) & !is.null(avgTP_clubs) ){
+    }else if( !is.vector(avgTP_clubs) ){
         stop("argument avgTP_clubs should be vector!")
     }else{
         avgTP_clubs <- suppressWarnings( as.numeric(avgTP_clubs) )
@@ -150,10 +150,10 @@ plot.convergence.clubs <- function(x,
     divergent <- !is.null( x$divergent )
     nplots <- length(clubs) + (avgTP)  # one plot per club plus the club averages (if avgTP is TRUE)
 
-    regions <- attributes(x)$regions
-    if( identical( regions, NULL) ){
+    unit_names <- attributes(x)$unit_names
+    if( identical( unit_names, NULL) ){
         data <- attributes(x)$data
-    } else data <- attributes(x)$data[, -regions]
+    } else data <- attributes(x)$data[, -unit_names]
 
 
     #graphical parameters
@@ -162,7 +162,7 @@ plot.convergence.clubs <- function(x,
     lw    <- ifelse( !is.null(arguments$lwd), arguments$lwd, 2 )
     lcol  <- ifelse( !is.null(arguments$col), arguments$col, "darkgrey" )
     legend_cex <- ifelse( !is.null(arguments$cex), arguments$cex, 0.8 )
-    legend_lab <- ifelse( identical(regions, NULL), "id", "regions")
+    legend_lab <- ifelse( identical(unit_names, NULL), "id", "unit_names")
 
     ### Compute dimensions plot layout ---
     if( !is.null(nrows) & !is.null(ncols) ){
@@ -268,7 +268,7 @@ plot.convergence.clubs <- function(x,
 
         graphics::matplot( t( atpm ), type='l',
                            ylim = if(y_fixed){ c(min(h)-0.1, max(h)+0.1) } else NULL ,
-                           ylab="Relative transition path", main = "All Clubs" )
+                           ylab="Relative transition path", main = "Average transition paths - All clubs" )
         graphics::abline(h=1, lty = ltype, lwd=lw, col=lcol)
         if( legend ){
             clubs_labs <- paste0('club', avgTP_clubs)

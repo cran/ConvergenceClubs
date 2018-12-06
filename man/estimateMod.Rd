@@ -4,7 +4,7 @@
 \alias{estimateMod}
 \title{Log-t test for convergence}
 \usage{
-estimateMod(H, time_trim, HACmethod = c("FQSB", "AQSB"))
+estimateMod(H, time_trim = 1/3, HACmethod = c("FQSB", "AQSB"))
 }
 \arguments{
 \item{H}{vector of H values}
@@ -20,8 +20,8 @@ with heteroskedasticity and autocorrelation consistent standard errors.
 The default method is "FQSB".}
 }
 \value{
-A list containing information about the model used to run the t-test
-on the regions in the club: beta coefficient, standard deviation, t-statistics and p-value.
+A named vector containing information about the model used to run the t-test
+on the units in the club: beta coefficient, standard deviation, t-statistics and p-value.
 }
 \description{
 Estimates the \emph{log-t} regression model proposed by Phillips and Sul (2007, 2009)
