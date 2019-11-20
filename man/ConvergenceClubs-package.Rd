@@ -6,7 +6,7 @@
 \alias{ConvergenceClubs-package}
 \title{ConvergenceClubs: Finding Convergence Clubs}
 \description{
-Functions for clustering regions that form convergence clubs, according to the definition of Phillips and Sul (2009) <doi:10.1002/jae.1080>.
+Functions for clustering regions that form convergence clubs, according to the definition of Phillips and Sul (2009) <doi:10.1002/jae.1080>. A package description is available in Sichera and Pizzuto (2019).
 }
 \section{Main functions}{
 
@@ -15,16 +15,22 @@ former finds clubs of convergence, given a dataset with units in rows and
 years in columns, returning an object of class \code{convergence.clubs}. The
 latter takes as argument an object of class \code{convergence.clubs} and
 applies the clustering procedure to the convergence clubs contained in the argument,
-according to either Phillips and Sul (2009) or  von Lyncker and Thoennessen (2016) procedure.
+according to either Phillips and Sul (2009) or  von Lyncker and Thoennessen (2017) procedure.
 }
 
 \references{
+Andrews, D. W., 1991. Heteroskedasticity and autocorrelation consistent covariance matrix estimation.
+Econometrica: Journal of the Econometric Society, 817-858.
+
 Phillips, P. C.; Sul, D., 2007. Transition modeling and econometric convergence tests. Econometrica 75 (6), 1771-1855.
 
 Phillips, P. C.; Sul, D., 2009. Economic transition and growth. Journal of Applied Econometrics 24 (7), 1153-1185.
 
 von Lyncker, K.; Thoennessen, R., 2017. Regional club convergence in the EU: evidence from a panel data analysis.
 Empirical Economics 52 (2),  525-553
+
+Sichera, R.; Pizzuto, P., 2019. ConvergenceClubs: A Package for Performing the Phillips and
+Sul's Club Convergence Clustering Procedure. The R Journal.
 }
 \seealso{
 Useful links:
@@ -35,7 +41,7 @@ Useful links:
 
 }
 \author{
-\strong{Maintainer}: Roberto Sichera \email{roberto.sichera@unipa.it} [copyright holder]
+\strong{Maintainer}: Roberto Sichera \email{rob.sichera@gmail.com} [copyright holder]
 
 Authors:
 \itemize{

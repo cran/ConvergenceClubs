@@ -4,11 +4,22 @@
 \alias{findClubs}
 \title{Finds convergence clubs}
 \usage{
-findClubs(X, dataCols, unit_names = NULL, refCol, time_trim = 1/3,
-  cstar = 0, HACmethod = c("FQSB", "AQSB"))
+findClubs(
+  X,
+  dataCols,
+  unit_names = NULL,
+  refCol,
+  time_trim = 1/3,
+  HACmethod = c("FQSB", "AQSB"),
+  cstar = 0,
+  cstar_method = c("fixed", "incremental"),
+  cstar_increment = 0.1,
+  cstar_cap = 3
+)
 }
 \arguments{
-\item{X}{dataframe containing data (preferably filtered data in order to remove business cycles)}
+\item{X}{dataframe containing data (preferably filtered data in order to remove business cycles).
+Data must not contain any NA or NaN values, otherwise the clustering procedure will be stopped with an error.}
 
 \item{dataCols}{integer vector with the column indices of the data}
 
@@ -19,18 +30,29 @@ with codes of the units}
 data}
 
 \item{time_trim}{a numeric value between 0 and 1, representing the portion of
-time periods to trim when running log t regression model.
+time periods to trim when running \emph{log-t}  regression model.
 Phillips and Sul (2007, 2009) suggest to discard the first third of the period.}
-
-\item{cstar}{numeric scalar, indicating the threshold value of the sieve criterion \eqn{c^*}
-to include units in the detected core (primary) group (step 3 of Phillips and Sul (2007, 2009) clustering algorithm).
-The default value is 0.}
 
 \item{HACmethod}{string indicating whether a Fixed Quadratic Spectral Bandwidth (\code{HACmethod="FQSB"}) or
 an Adaptive Quadratic Spectral Bandwidth (\code{HACmethod="AQSB"}) should be used for the truncation
 of the Quadratic Spectral kernel in estimating the \emph{log-t} regression model
 with heteroskedasticity and autocorrelation consistent standard errors.
 The default method is "FQSB".}
+
+\item{cstar}{numeric scalar, indicating the threshold value of the sieve criterion (\eqn{c^*}{c*})
+to include units in the detected core (primary) group (step 3 of Phillips and Sul (2007, 2009) clustering algorithm).
+The default value is 0.}
+
+\item{cstar_method}{a string specifying whether cstar should be mantained fixed
+(\code{cstar_method="fixed"}) or increased iteratively until the whole club satisfies
+the condition \eqn{tvalue>-1.65} (\code{cstar_method="incremental"}).
+Default is \code{cstar_method="fixed"} (see Details).}
+
+\item{cstar_increment}{a positive value specifying the increment to cstar,
+only valid if \code{cstar_method="incremental"} (see Details); the default value is 0.1.}
+
+\item{cstar_cap}{scalar indicating the maximum value up to which \code{cstar} can
+be increased; the default value is 3.}
 }
 \value{
 Ad object of class \code{convergence.clubs}, containing a list of
@@ -51,7 +73,7 @@ to the Phillips and Sul clustering procedure, the following steps are implemente
        \item (Cross section last observation ordering):
              Sort units in descending order according to the last panel observation of the period;
        \item (Core group formation):
-       Run the log t regression for the first k units \eqn{(2 < k < N)} maximizing k
+       Run the \emph{log-t}  regression for the first k units \eqn{(2 < k < N)} maximizing k
        under the condition that t-value is \eqn{> -1.65}. In other words, chose the core group size k* as follows:
 
        \deqn{k^*= argmax_k \{t_k\} }{k* = argmax \, t(k)  }  subject to \deqn{ min\{t_k \} > -1.65}{min t(k) > 1.65}
@@ -60,48 +82,72 @@ to the Phillips and Sul clustering procedure, the following steps are implemente
        drop the first unit and repeat the same procedure. If \eqn{t_k >-1.65}{t(k) > -1.65} does not hold
        for any units chosen, the whole panel diverges;
        \item (Sieve the data for club membership): After the core group  is detected,
-       run the \eqn{log t}  regression for the core group adding (one by one)
+       run the \emph{log-t} regression for the core group adding (one by one)
        each unit that does not belong to the latter. If \eqn{t_k }{t(k)} is greater than a critical value \eqn{c^*}{c*}
        add the new unit in the convergence club.
-       All these units (those included in the core group \eqn{k^*}{k*} plus those added) form the first convergence club;
-       \item (Recursion and stopping rule): If there are units for which the
-       previous condition fails, gather all these units in one group and run
-       the \emph{log-t} test to see if  the condition \eqn{t_k >-1.65}{t(k) > -1.65} holds.
-       If the condition is satisfied, conclude that there are two convergence clubs.
+       All these units (those included in the core group \eqn{k^*}{k*} plus those added) form the first convergence club.
+       Note that Phillips and Sul (2007) suggest to make sure \eqn{t_k>-1.65}{t(k) > -1.65}
+       for the subconvergence group obtained. Otherwise, repeat the procedure by
+       increasing the value of the \eqn{c^*}{c*} parameter until the condition
+       \eqn{t_k>-1.65}{t(k) > -1.65} is satisfied for the subconvergence group;
+
+       \item (Recursion and stopping rule): If there are units for which the previous
+       condition fails (\eqn{t_k <c^*}{t(k) < c*}), gather all these units in one
+       group and run the \emph{log-t}  test to see if the condition \eqn{t_k >-1.65}{t(k) > -1.65}
+       holds. If the condition is satisfied, conclude that there are two convergence clubs.
        Otherwise, step 1 to 3 should be repeated on the same group to determine
        whether there are other subgroups that constitute convergence clubs.
-       If no further convergence clubs are found (hence, no k in step 2 satisfies
-       the condition \eqn{t_k >-1.65}{t(k) > -1.65}), the remaining units diverge.
+       If no k in step 2 satisfies the condition \eqn{t_k >-1.65}{t(k) > -1.65},
+       the remaining units diverge.
    }
 
-Note that Phillips and Sul (2007) suggest to make sure \eqn{t_k>-1.65} for the first club.
-Otherwise, repeat the procedure by increasing the value of the \eqn{c^*} parameter
-until the condition \eqn{t_k>-1.65} is satisfied for the first club.
+
+
+Note that the clustering procedure may return groups with \eqn{t_k <-1.65}{t(k) < -1.65},
+which are not really convergence clubs. In this case, following step 3 of
+the clustering procedure there are two options:
+(i) allow an iterative increase
+of the cstar parameter until the subconvergence club satisfies the condition
+\eqn{t_k >-1.65}{t(k) > -1.65}. In this case it should the argument \code{cstar_method}
+should be set to \code{"incremental"} and a positive argument for the \code{cstar_increment}
+argument should be chosen;
+(ii) increase the value of the \code{cstar} in order to increase the discriminatory
+power of the \emph{log-t} test in the formation of each club.
+
+Information about clubs, divergent units and the \eqn{c^*}{c*} used for each club can be
+easily displayed by means of the \code{summary()} function, for which the package provides
+a specific method for the \code{convergence.clubs} class.
 }
 \examples{
 data("filteredGDP")
 
+
+# Cluster Countries using GDP from year 1970 to year 2003
+clubs <- findClubs(filteredGDP,  dataCols=2:35, unit_names = 1, refCol=35,
+                   time_trim = 1/3, HACmethod = "FQSB",
+                   cstar = 0,
+                   cstar_method = 'incremental',
+                   cstar_increment = 0.1)
+
+
+
 \dontrun{
 # Cluster Countries using GDP from year 1970 to year 2003
 clubs <- findClubs(filteredGDP,  dataCols=2:35, unit_names = 1, refCol=35,
-                   time_trim = 1/3, cstar = 0, HACmethod = "AQSB")
+                   time_trim = 1/3, HACmethod = "AQSB", cstar = 0)
+
 }
-
-clubs <- findClubs(filteredGDP, dataCols=2:35, unit_names = 1, refCol=35,
-                   time_trim = 1/3, cstar = 0, HACmethod = "FQSB")
-summary(clubs)
-
 
 }
 \references{
+Andrews, D. W., 1991. Heteroskedasticity and autocorrelation consistent covariance matrix estimation. Econometrica: Journal of the Econometric Society, 817-858.
+
 Phillips, P. C.; Sul, D., 2007. Transition modeling and econometric convergence tests. Econometrica 75 (6), 1771-1855.
 
 Phillips, P. C.; Sul, D., 2009. Economic transition and growth. Journal of Applied Econometrics 24 (7), 1153-1185.
-
-Andrews, D. W., 1991. Heteroskedasticity and autocorrelation consistent covariance matrix estimation. Econometrica: Journal of the Econometric Society, 817-858.
 }
 \seealso{
 \code{\link{mergeClubs}}, Merges a list of clubs created by \code{findClubs};
 
-\code{\link{mergeDivergent}}, Merges divergent units according to the algorithm proposed by von Lyncker and Thoennessen (2016)
+\code{\link{mergeDivergent}}, Merges divergent units according to the algorithm proposed by von Lyncker and Thoennessen (2017)
 }

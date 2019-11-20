@@ -4,13 +4,21 @@
 \alias{club}
 \title{Find a club}
 \usage{
-club(X, dataCols, core, time_trim, HACmethod = c("FQSB", "AQSB"),
-  cstar = 0)
+club(
+  X,
+  dataCols,
+  core,
+  time_trim,
+  HACmethod = c("FQSB", "AQSB"),
+  cstar = 0,
+  cstar_method = c("fixed", "incremental"),
+  cstar_increment = 0.1,
+  cstar_cap = 3
+)
 }
 \arguments{
-\item{X}{matrix or dataframe containing data (preferably filtered data in order to remove business cycles)}
-
-\item{dataCols}{integer vector with the column indices of the data}
+\item{X}{dataframe containing data (preferably filtered data in order to remove business cycles).
+Data must not contain any NA or NaN values, otherwise the clustering procedure will be stopped with an error.#' @param dataCols integer vector with the column indices of the data}
 
 \item{core}{an integer vector containing the id's of units in core group}
 
@@ -27,6 +35,17 @@ The default method is "FQSB".}
 \item{cstar}{numeric scalar, indicating the threshold value of the sieve criterion \eqn{c^*}
 to include units in the detected core (primary) group (step 3 of Phillips and Sul (2007, 2009) clustering algorithm).
 The default value is 0.}
+
+\item{cstar_method}{a string specifying whether cstar should be mantained fixed
+(\code{cstar_method="fixed"}) or increased iteratively until the whole club satisfies
+the condition \eqn{tvalue>-1.65} (\code{cstar_method="incremental"}).
+Default is \code{cstar_method="fixed"} (see Details).}
+
+\item{cstar_increment}{a positive value specifying the increment to cstar,
+only valid if \code{cstar_method="incremental"} (see Details).}
+
+\item{cstar_cap}{scalar indicating the maximum value up to which \code{cstar} can
+be increased}
 }
 \value{
 A list of three objects: \code{id}, a vector containing the row indices
@@ -44,3 +63,4 @@ Phillips, P. C.; Sul, D., 2007. Transition modeling and econometric convergence 
 
 Phillips, P. C.; Sul, D., 2009. Economic transition and growth. Journal of Applied Econometrics 24 (7), 1153-1185.
 }
+\keyword{internal}
